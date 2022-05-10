@@ -6,7 +6,7 @@ const demoUserObject = {
     discriminator: '0000',
     avatar: null
 };
-    
+
 export default () => {
 
     const removeAnalytics = window.location.href.includes('noanalytics');
@@ -30,6 +30,12 @@ export default () => {
         channelCount: randomNumber(50, 100),
         messageCount: randomNumber(300, 600),
         characterCount: randomNumber(4000, 10000),
+      topEmotes: Array.from({ length: 10 }, () => ({
+        name: 'Emote',
+        id: 892739134513369099,
+        url: 'https://cdn.discordapp.com/emojis/892739134513369099.png?size=240',
+        count: randomNumber(200, 600)
+      })).sort((a, b) => b.count - a.count),
         totalSpent: randomNumber(100, 200),
         hoursValues: new Array(24).fill(0).map(() => Math.floor(Math.random() * 300) + 1),
         favoriteWords: [
@@ -51,7 +57,7 @@ export default () => {
             openCount: randomNumber(200, 300),
             averageOpenCountPerDay: randomNumber(3, 5),
             notificationCount: randomNumber(200, 400),
-            joinVoiceChannelCount: randomNumber(40, 100), 
+          joinVoiceChannelCount: randomNumber(40, 100),
             joinCallCount: randomNumber(20, 30),
             addReactionCount: randomNumber(100, 200),
             messageEditedCount: randomNumber(50, 70),

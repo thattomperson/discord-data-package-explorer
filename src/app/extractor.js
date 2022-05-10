@@ -17,7 +17,7 @@ const fetchUser = async (userID) => {
         headers: {
             Authorization: `Bearer ${localStorage.getItem('diswhoJwt')}`
         }
-    }).catch(() => {});
+    }).catch(() => { });
     if (!res || !res.data) return {
         username: 'Unknown',
         discriminator: '0000',
@@ -70,10 +70,10 @@ const readAnalyticsFile = (file) => {
         file.ondata = (_err, data, final) => {
             bytesRead += data.length;
             loadTask.set(`Loading user statistics... ${Math.ceil(bytesRead / file.originalSize * 100)}%`);
-            const remainingBytes = file.originalSize-bytesRead;
-            const timeToReadByte = (Date.now()-startAt) / bytesRead;
+          const remainingBytes = file.originalSize - bytesRead;
+          const timeToReadByte = (Date.now() - startAt) / bytesRead;
             const remainingTime = parseInt(remainingBytes * timeToReadByte / 1000);
-            loadEstimatedTime.set(`Estimated time: ${remainingTime+1} second${remainingTime+1 === 1 ? '' : 's'}`);
+          loadEstimatedTime.set(`Estimated time: ${remainingTime + 1} second${remainingTime + 1 === 1 ? '' : 's'}`);
             decoder.push(data, final);
         };
         let prevChkEnd = '';
@@ -197,7 +197,7 @@ export const extractData = async (files) => {
             Promise.all([
                 readFile(channelDataPath),
                 readFile(channelMessagesPath)
-            ]).then(([ rawData, rawMessages ]) => {
+            ]).then(([rawData, rawMessages]) => {
 
                 if (!rawData || !rawMessages) {
                     console.log(`[debug] Files of channel ${channelID} can't be read. Data is ${!!rawData} and messages are ${!!rawMessages}. (path=${channelDataPath})`);
@@ -236,6 +236,25 @@ export const extractData = async (files) => {
     }));
     extractedData.characterCount = channels.map((channel) => channel.messages).flat().map((message) => message.length).reduce((p, c) => p + c);
 
+  console.log('[debug] Loading top emotes...');
+
+  const allEmotes = channels.map((channel) => channel.messages).flat().map(message => [...new Set(message.words)]).flat().map((word) => {
+    const matches = String(word).match(/<a?:(.+):(.+)>/g);
+    if (matches) {
+      return matches[0];
+    }
+  }).filter(emote => emote !== undefined);
+
+  extractedData.topEmotes = [...new Set(allEmotes)].sort((a, b) => allEmotes.filter(e => e === b).length - allEmotes.filter(e => e === a).length).slice(0, 10);
+  extractedData.topEmotes = extractedData.topEmotes.map((emote) => ({
+    name: emote.match(/<a?:(.+):(.+)>/)[1],
+    id: emote.match(/<a?:(.+):(.+)>/)[2],
+    url: `https://cdn.discordapp.com/emojis/${emote.match(/<a?:(.+):(.+)>/)[2]}.png`,
+    count: allEmotes.filter(e => e === emote).length
+  }));
+
+  console.log('[debug] Top emotes loaded.');
+
     for (let i = 0; i < 24; i++) {
         extractedData.hoursValues.push(channels.map((c) => c.messages).flat().filter((m) => new Date(m.timestamp).getHours() === i).length);
     }
@@ -265,7 +284,7 @@ export const extractData = async (files) => {
 
     console.log('[debug] Fetching top DMs...');
     loadTask.set('Loading user activity...');
-    
+
     extractedData.topDMs = channels
         .filter((channel) => channel.isDM)
         .sort((a, b) => b.messages.length - a.messages.length)
@@ -295,7 +314,7 @@ export const extractData = async (files) => {
     extractedData.openCount = statistics.openCount;
     extractedData.averageOpenCountPerDay = extractedData.openCount && perDay(statistics.openCount, extractedData.user.id);
     extractedData.notificationCount = statistics.notificationCount;
-    extractedData.joinVoiceChannelCount = statistics.joinVoiceChannelCount; 
+  extractedData.joinVoiceChannelCount = statistics.joinVoiceChannelCount;
     extractedData.joinCallCount = statistics.joinCallCount;
     extractedData.addReactionCount = statistics.addReactionCount;
     extractedData.messageEditedCount = statistics.messageEditedCount;
